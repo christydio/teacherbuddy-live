@@ -1,0 +1,1668 @@
+<title>TeacherBuddy Live</title>
+<style>
+  :root{
+    --accent:#1B2A4A;
+    --accent-ink:#12213D;
+    --accent-soft:#E8ECF4;
+    --bg:#FAFAFB;
+    --surface:#FFFFFF;
+    --surface-2:#F2F3F5;
+    --text:#14171F;
+    --text-muted:#6B7280;
+    --border:#E3E5EA;
+    --good:#1B2A4A;
+    --warn:#A6742E;
+    --warn-soft:#F3E9D8;
+    --critical:#A5473B;
+    --critical-soft:#F3E1DD;
+    --shadow: 0 1px 2px rgba(20,23,31,0.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --accent:#8CA2D2;
+      --accent-ink:#CBD8ED;
+      --accent-soft:#1E2A42;
+      --bg:#0F1115;
+      --surface:#171A21;
+      --surface-2:#1E222B;
+      --text:#EDEEF2;
+      --text-muted:#8B93A3;
+      --border:#2A2F3A;
+      --good:#8CA2D2;
+      --warn:#D8A85E;
+      --warn-soft:#3A2E19;
+      --critical:#D98479;
+      --critical-soft:#3B241E;
+      --shadow: 0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --accent:#8CA2D2;
+    --accent-ink:#CBD8ED;
+    --accent-soft:#1E2A42;
+    --bg:#0F1115;
+    --surface:#171A21;
+    --surface-2:#1E222B;
+    --text:#EDEEF2;
+    --text-muted:#8B93A3;
+    --border:#2A2F3A;
+    --good:#8CA2D2;
+    --warn:#D8A85E;
+    --warn-soft:#3A2E19;
+    --critical:#D98479;
+    --critical-soft:#3B241E;
+    --shadow: 0 1px 2px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight:700;
+    letter-spacing:-0.015em;
+    text-wrap:balance;
+    color:var(--text);
+  }
+  .mono, .num{ font-family:ui-monospace, "SF Mono", "Consolas", "Menlo", monospace; font-variant-numeric:tabular-nums; }
+  button{ font:inherit; }
+  a{ color:var(--accent); }
+
+  .wizard{ max-width:720px; margin:0 auto; padding:0 20px 64px; }
+
+  .wizard-header{ padding:22px 0 16px; position:sticky; top:env(safe-area-inset-top, 0px); background:var(--bg); z-index:5; }
+  .wizard-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+  .brand{ display:flex; align-items:center; gap:9px; }
+  .brand-mark{
+    width:28px;height:28px;border-radius:6px;
+    background:var(--accent); color:var(--surface);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700; font-size:14px; flex:none; letter-spacing:0;
+  }
+  .brand-name{ font-weight:700; font-size:16px; letter-spacing:-0.01em; }
+  .step-label{ font-size:12px; color:var(--text-muted); font-weight:600; }
+  .progress-track{ height:3px; background:var(--border); border-radius:999px; overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--accent); border-radius:999px; transition:width .35s ease; width:25%; }
+
+  .day-strip{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .day-pill{
+    border:1px solid var(--border); background:var(--surface); color:var(--text-muted);
+    border-radius:8px; padding:6px 12px; font-size:12.5px; font-weight:600; cursor:pointer; flex:none;
+  }
+  .day-pill:hover{ background:var(--surface-2); }
+  .day-pill.active{ background:var(--accent); border-color:var(--accent); color:var(--surface); }
+  .day-pill.weekly{ margin-left:8px; }
+  .day-divider{ width:1px; height:18px; background:var(--border); margin:0 2px; flex:none; }
+
+  main.wizard-main{ padding-top:6px; }
+  .page{ }
+  .eyebrow{ font-size:11.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+  .page h1{ font-size:25px; margin:5px 0 2px; }
+  .page .sub{ color:var(--text-muted); font-size:13.5px; margin-bottom:20px; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:18px 20px; box-shadow:var(--shadow);
+  }
+  .card + .card{ margin-top:12px; }
+  .card h3{ font-size:14.5px; margin:0 0 10px; font-weight:700; }
+  .row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .stack{ display:flex; flex-direction:column; gap:10px; }
+
+  .teacher-line{ display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--text-muted); margin-bottom:16px; flex-wrap:wrap; }
+  .teacher-line .name{ color:var(--text); font-weight:700; }
+
+  .text-input, select.text-input{
+    width:100%; border:1px solid var(--border); border-radius:8px; padding:9px 12px;
+    font:inherit; font-size:13.5px; color:var(--text); background:var(--surface-2);
+  }
+  .field-label{ font-size:11.5px; color:var(--text-muted); display:block; margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:.03em; }
+
+  .primary-btn{
+    background:var(--accent); color:var(--surface); border:none;
+    border-radius:8px; padding:11px 18px; font-weight:700; font-size:13.5px;
+    cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  }
+  .primary-btn:active{ transform:translateY(1px); }
+  .primary-btn[disabled]{ opacity:.45; cursor:default; }
+  .ghost-btn{
+    background:transparent; border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:10px 16px; font-size:13px; font-weight:600; cursor:pointer;
+  }
+  .ghost-btn:hover{ background:var(--surface-2); }
+  .flag-btn{
+    background:var(--accent); color:var(--surface); border:none;
+    border-radius:8px; padding:9px 15px; font-weight:700; font-size:13px;
+    cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  }
+  .flag-btn[disabled]{ opacity:.45; cursor:default; }
+  .chip-btn{
+    border:1px solid var(--border); background:transparent; border-radius:7px;
+    padding:6px 10px; font-size:12px; cursor:pointer; color:var(--text); font-weight:600;
+  }
+  .chip-btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--surface); }
+  .chip-btn[disabled]{ opacity:.5; cursor:default; }
+  .edit-link{ background:none; border:none; color:var(--accent); font-size:12px; font-weight:700; cursor:pointer; padding:0; flex:none; }
+
+  .wizard-nav{ display:flex; justify-content:space-between; align-items:center; margin-top:22px; }
+
+  .intro-steps{ display:flex; flex-direction:column; gap:0; margin:16px 0 2px; }
+  .intro-steps .step{
+    display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--border); font-size:13.5px;
+  }
+  .intro-steps .step:last-child{ border-bottom:none; }
+  .intro-steps .num{
+    width:20px;height:20px;border-radius:5px; background:var(--surface-2); color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex:none;
+  }
+  .intro-steps .txt strong{ display:block; margin-bottom:2px; }
+  .intro-steps .txt span{ color:var(--text-muted); }
+
+  .wellbeing-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .wellbeing-chip{
+    border:1px solid var(--border); background:var(--surface); border-radius:8px;
+    padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer; color:var(--text);
+  }
+  .wellbeing-chip:hover{ background:var(--surface-2); }
+  .wellbeing-chip.selected{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); }
+
+  .alloc-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 0; border-bottom:1px solid var(--border); font-size:13.5px; }
+  .alloc-row:last-child{ border-bottom:none; }
+  .alloc-row select{ width:auto; min-width:100px; flex:none; }
+  .alloc-q{ font-weight:600; }
+  .alloc-hint{ font-size:12px; color:var(--text-muted); margin-top:2px; font-weight:400; }
+
+  .passage{
+    font-size:13.5px; padding:13px 15px; background:var(--surface-2); border-radius:8px;
+    border:1px solid var(--border); font-style:italic; color:var(--text);
+  }
+  .waveform{ display:flex; align-items:flex-end; gap:3px; height:52px; margin-top:16px; }
+  .waveform span{ width:4px; border-radius:2px; background:var(--border); flex:none; }
+  .waveform.active span{ background:var(--accent); animation:wave 0.9s ease-in-out infinite; }
+  .waveform span:nth-child(odd){ animation-delay:0.15s; }
+  .waveform span:nth-child(3n){ animation-delay:0.3s; }
+  @keyframes wave{ 0%,100%{ transform:scaleY(1); } 50%{ transform:scaleY(0.4); } }
+  @media (prefers-reduced-motion: reduce){ .waveform.active span{ animation:none; } }
+
+  .enroll-progress{ display:flex; gap:6px; align-items:center; }
+  .enroll-progress .dot{ width:7px; height:7px; border-radius:50%; background:var(--border); flex:none; }
+  .enroll-progress .dot.current{ background:var(--warn); }
+  .enroll-progress .dot.done{ background:var(--good); }
+
+  .success-banner{
+    display:none; align-items:center; gap:8px; background:var(--accent-soft); color:var(--accent-ink);
+    border-radius:8px; padding:10px 14px; font-size:13px; font-weight:600; margin-top:14px;
+  }
+  .success-banner.show{ display:flex; }
+
+  .consent-row{
+    display:flex; gap:10px; align-items:flex-start; font-size:12.5px; color:var(--text-muted); margin-top:16px;
+  }
+  .consent-row input{ margin-top:3px; flex:none; }
+
+  .ach-item, .anec-item{ display:flex; gap:10px; align-items:flex-start; font-size:13.5px; padding:9px 0; border-bottom:1px solid var(--border); }
+  .ach-item:last-child, .anec-item:last-child{ border-bottom:none; }
+  .ach-item .dot{ width:6px;height:6px;border-radius:50%; background:var(--good); margin-top:7px; flex:none; }
+  .anec-item{ flex-direction:column; gap:6px; }
+  .anec-item .anec-row{ display:flex; gap:10px; align-items:flex-start; justify-content:space-between; width:100%; }
+  .anec-item .txt{ flex:1; }
+
+  .idle-bar{ display:flex; height:10px; border-radius:6px; overflow:hidden; border:1px solid var(--border); }
+  .idle-bar span{ height:100%; }
+  .idle-legend{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:12px; font-size:12px; }
+  .idle-legend .item{ display:flex; align-items:center; gap:6px; color:var(--text-muted); }
+  .idle-legend .sw{ width:8px;height:8px;border-radius:2px; }
+
+  .confirm-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:10px 0; border-bottom:1px solid var(--border); font-size:13.5px;
+  }
+  .confirm-row:last-child{ border-bottom:none; }
+  .confirm-row .cause{ font-weight:700; }
+  .confirm-row .dur{ color:var(--text-muted); font-size:12px; }
+  .confirm-actions{ display:flex; gap:6px; flex:none; }
+  .confirmed-badge{ font-size:11.5px; color:var(--good); font-weight:700; display:none; }
+
+  .chat{ display:flex; flex-direction:column; gap:12px; }
+  .bubble{ max-width:88%; padding:10px 13px; border-radius:10px; font-size:13.5px; }
+  .bubble.bot{ background:var(--surface-2); align-self:flex-start; border-bottom-left-radius:3px; }
+  .bubble.me{ background:var(--accent); color:var(--surface); align-self:flex-end; border-bottom-right-radius:3px; }
+  .bubble .stamp{ display:block; margin-top:6px; font-size:10.5px; opacity:.65; }
+  .reply-row{ display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; }
+
+  .edit-textarea{
+    width:100%; min-height:64px; border:1px solid var(--border); border-radius:8px;
+    padding:10px 12px; font:inherit; font-size:13.5px; color:var(--text); background:var(--surface-2);
+    resize:vertical; margin-top:8px;
+  }
+  .edited-badge{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700;
+    color:var(--warn); background:var(--warn-soft); padding:3px 9px; border-radius:6px; margin-top:8px;
+  }
+  .dialog{
+    margin-top:10px; padding:12px 14px; border-radius:8px; background:var(--surface-2);
+    border:1px solid var(--border); font-size:13px; display:none;
+  }
+  .dialog.show{ display:block; }
+  .dialog .actions{ display:flex; gap:8px; margin-top:10px; }
+
+  .compare{ display:flex; flex-direction:column; gap:18px; }
+  .metric-label{ display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; margin-bottom:8px; }
+  .bars{ display:flex; align-items:flex-end; gap:18px; height:90px; }
+  .bar-group{ display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; height:100%; justify-content:flex-end; }
+  .bar-group .bar{ width:100%; max-width:52px; border-radius:4px 4px 2px 2px; position:relative; }
+  .bar-group .val{ font-size:12px; font-weight:700; }
+  .bar-group .lbl{ font-size:11px; color:var(--text-muted); }
+  .bar.today{ background:var(--accent); }
+  .bar.yesterday{ background:var(--border); }
+
+  .week-block{ padding:10px 0; border-bottom:1px solid var(--border); }
+  .week-block:last-child{ border-bottom:none; }
+  .week-block .count{ font-size:20px; font-weight:700; color:var(--accent-ink); }
+  .week-block .desc{ font-size:12.5px; color:var(--text-muted); margin-top:2px; }
+  .prep-note{
+    margin-top:16px; padding:11px 14px; border-radius:8px; background:var(--accent-soft);
+    color:var(--accent-ink); font-size:12px;
+  }
+
+  .record-cta{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; padding:26px 24px; }
+  .record-cta-top{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .record-big-btn{
+    background:var(--accent); color:var(--surface); border:none; border-radius:999px;
+    padding:16px 34px; font-weight:700; font-size:16px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:10px; letter-spacing:.01em;
+  }
+  .record-big-btn:active{ transform:translateY(1px); }
+  .record-big-btn.recording{ background:var(--critical); }
+  .record-dot{ width:11px; height:11px; border-radius:50%; background:var(--surface); opacity:.85; flex:none; }
+  .record-dot.active{ animation:recpulse 1.1s ease-in-out infinite; }
+  @keyframes recpulse{ 0%,100%{opacity:1} 50%{opacity:.35} }
+  @media (prefers-reduced-motion: reduce){ .record-dot.active{ animation:none; } }
+  .record-timer{ font-size:15px; color:var(--text-muted); }
+  .record-guidance{ margin:4px 0 0; font-size:12.5px; color:var(--text-muted); max-width:440px; }
+
+  .tab-switch{ display:flex; gap:4px; background:var(--surface-2); border-radius:9px; padding:3px; margin-bottom:18px; width:fit-content; }
+  .tab-btn{
+    border:none; background:transparent; color:var(--text-muted); font-size:13px; font-weight:600;
+    padding:8px 16px; border-radius:7px; cursor:pointer;
+  }
+  .tab-btn.active{ background:var(--surface); color:var(--text); box-shadow:var(--shadow); }
+
+  [hidden]{ display:none !important; }
+
+  .version-btn{
+    font-size:11px; font-weight:700; color:var(--text-muted); background:var(--surface-2);
+    border:1px solid var(--border); border-radius:7px; padding:3px 10px; cursor:pointer; flex:none;
+  }
+  .version-btn:hover{ background:var(--border); }
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(15,17,21,.5); display:flex; align-items:center;
+    justify-content:center; padding:20px; z-index:50;
+  }
+  .modal-overlay[hidden]{ display:none; }
+  .modal-card{
+    background:var(--surface); border-radius:10px; max-width:440px; width:100%; padding:22px 24px;
+    box-shadow:var(--shadow); max-height:80vh; overflow-y:auto; position:relative; border:1px solid var(--border);
+  }
+  .modal-card h3{ margin:0 0 4px; font-size:16px; }
+  .modal-card .close-x{
+    position:absolute; top:16px; right:18px; background:none; border:none; font-size:18px;
+    cursor:pointer; color:var(--text-muted); line-height:1;
+  }
+  .current-build{ font-size:12px; color:var(--text-muted); margin-bottom:14px; }
+  .current-build strong{ color:var(--text); }
+  .version-entry{ padding:10px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .version-entry:last-child{ border-bottom:none; }
+  .version-entry .tag{
+    font-family:ui-monospace, monospace; font-size:11px; font-weight:700; color:var(--accent-ink);
+    background:var(--accent-soft); padding:2px 7px; border-radius:5px; margin-right:6px;
+  }
+  .version-entry .date{ font-size:11px; color:var(--text-muted); }
+  .version-entry p{ margin:6px 0 0; color:var(--text-muted); }
+
+  .field-error{
+    margin-top:10px; padding:9px 12px; border-radius:8px; background:var(--critical-soft);
+    color:var(--critical); font-size:12.5px; font-weight:500;
+  }
+  .mic-status-card{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .mic-status-row{ display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-muted); }
+  .mic-status-dot{ width:9px; height:9px; border-radius:50%; background:var(--border); flex:none; }
+  .mic-status-dot.granted{ background:var(--good); }
+  .mic-status-dot.denied{ background:var(--critical); }
+  .mic-status-dot.prompt{ background:var(--warn); }
+  .empty-state{ font-size:13px; color:var(--text-muted); padding:6px 0; line-height:1.55; }
+  .sample-playback{ display:flex; align-items:center; gap:10px; font-size:12px; color:var(--text-muted); }
+  .sample-playback audio{ height:32px; max-width:220px; flex:1; }
+  .bubble.me audio{ height:32px; max-width:100%; }
+
+  .live-transcript{
+    max-height:220px; overflow-y:auto; font-size:13px; line-height:1.65;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; white-space:pre-wrap;
+  }
+  .live-transcript .interim{ color:var(--text-muted); font-style:italic; }
+  .rec-status-line{ font-size:12px; color:var(--text-muted); margin-top:10px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .rec-status-dot{ width:7px;height:7px;border-radius:50%; background:var(--border); flex:none; }
+  .rec-status-dot.live{ background:var(--good); animation:recpulse 1.1s ease-in-out infinite; }
+  .auto-item{ display:flex; gap:10px; align-items:flex-start; font-size:13.5px; padding:9px 0; border-bottom:1px solid var(--border); }
+  .auto-item:last-child{ border-bottom:none; }
+  .auto-item .dot{ width:6px;height:6px;border-radius:50%; margin-top:7px; flex:none; }
+  .auto-item.achievement .dot{ background:var(--good); }
+  .auto-item.anecdote .dot{ background:var(--warn); }
+  .auto-item .body{ flex:1; }
+  .auto-item .meta{ font-size:11.5px; color:var(--text-muted); margin-top:2px; }
+  .auto-item .remove-btn{ background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:13px; flex:none; padding:2px 4px; line-height:1; }
+  .auto-item .remove-btn:hover{ color:var(--critical); }
+  .idle-item{ display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; border-bottom:1px solid var(--border); }
+  .idle-item:last-child{ border-bottom:none; }
+  .idle-item .dur{ color:var(--text-muted); font-size:12px; }
+
+  @media (max-width: 560px){
+    .wizard{ padding:0 16px 48px; }
+    .bars{ gap:10px; }
+    .anec-item .anec-row{ flex-direction:column; gap:4px; }
+    .alloc-row{ flex-direction:column; align-items:flex-start; gap:6px; }
+  }
+
+  /* ---------- Print-only weekly report ----------
+     #printReport is empty and invisible during normal use. downloadPdfReport()
+     fills it right before calling window.print(); the print stylesheet below
+     hides everything else so only the report shows in the print/PDF output. */
+  #printReport{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    #printReport, #printReport *{ visibility:visible; }
+    #printReport{
+      display:block; position:absolute; left:0; top:0; width:100%;
+      background:#fff; color:#111; font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding:0 24px;
+    }
+    #printReport h1{ font-size:20px; margin:0 0 2px; color:#111; }
+    #printReport .pr-meta{ font-size:12px; color:#444; margin-bottom:18px; }
+    #printReport h2{ font-size:14px; margin:20px 0 8px; color:#111; border-bottom:1px solid #ccc; padding-bottom:4px; }
+    #printReport table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+    #printReport td{ padding:5px 4px; border-bottom:1px solid #eee; }
+    #printReport td.pr-label{ color:#555; }
+    #printReport td.pr-val{ text-align:right; font-weight:600; }
+    #printReport .pr-reply{ font-size:12.5px; padding:4px 0; border-bottom:1px solid #f0f0f0; }
+    #printReport .pr-reply .pr-day{ font-weight:700; margin-right:6px; }
+    #printReport .pr-empty{ font-size:12.5px; color:#777; font-style:italic; }
+    #printReport .pr-footer{ margin-top:24px; font-size:10.5px; color:#888; border-top:1px solid #ccc; padding-top:8px; }
+  }
+</style>
+
+<div class="wizard">
+  <header class="wizard-header">
+    <div class="wizard-top">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div class="brand-name">TeacherBuddy</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="step-label" id="stepLabel">Step 1 of 4 · About</div>
+        <button class="version-btn" onclick="document.getElementById('changelogModal').hidden=false">v3.0 · Oct 3</button>
+      </div>
+    </div>
+    <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="day-strip" id="dayStrip" hidden>
+      <button class="day-pill active" data-day="mon" onclick="selectDay('mon')">Mon</button>
+      <button class="day-pill" data-day="tue" onclick="selectDay('tue')">Tue</button>
+      <button class="day-pill" data-day="wed" onclick="selectDay('wed')">Wed</button>
+      <button class="day-pill" data-day="thu" onclick="selectDay('thu')">Thu</button>
+      <button class="day-pill" data-day="fri" onclick="selectDay('fri')">Fri</button>
+      <div class="day-divider"></div>
+      <button class="day-pill weekly" data-day="weekly" onclick="selectDay('weekly')">Weekly Reflection</button>
+    </div>
+  </header>
+
+  <main class="wizard-main">
+
+    <!-- STEP 1: ABOUT -->
+    <section class="page" id="page-about">
+      <div class="eyebrow">Personal prototype</div>
+      <h1>What is TeacherBuddy?</h1>
+      <div class="sub">A short setup, then it runs quietly in the background of your school day.</div>
+
+      <div class="card">
+        <p style="margin:0 0 10px; font-size:14px;">TeacherBuddy listens through the school day, then turns it into a short, honest reflection — achievements, anecdotes, and the moments that pulled you off track — so you can see your own day clearly and talk it through, one week at a time.</p>
+        <p style="margin:0; font-size:14px; color:var(--text-muted);">Everyone's audio is handled with care, but it's not entirely on-device: live speech-to-text during Live the Day sends your classroom's audio content to your browser's speech-recognition service to generate text. Step 5 explains exactly what that means before you start.</p>
+
+        <div class="intro-steps">
+          <div class="step"><span class="num">1</span><div class="txt"><strong>Tell us about you</strong><span>Your name, subject, and school.</span></div></div>
+          <div class="step"><span class="num">2</span><div class="txt"><strong>A quick onboarding</strong><span>How the year's going, one goal, a sense of your week.</span></div></div>
+          <div class="step"><span class="num">3</span><div class="txt"><strong>Set up your voice</strong><span>A short recording so TeacherBuddy can tell you apart from the room.</span></div></div>
+          <div class="step"><span class="num">4</span><div class="txt"><strong>Live it, day by day</strong><span>Monday through Friday: live the day, then reflect. Over the weekend: review the whole week together.</span></div></div>
+        </div>
+      </div>
+
+      <div class="wizard-nav" style="justify-content:flex-end;">
+        <button class="primary-btn" onclick="goTo('details')">Get started →</button>
+      </div>
+    </section>
+
+    <!-- STEP 2: DETAILS -->
+    <section class="page" id="page-details" hidden>
+      <div class="eyebrow">Step 2 of 5 — Your details</div>
+      <h1>Tell us about you</h1>
+      <div class="sub">This is what TeacherBuddy will use to personalize your days and your weekly reflection.</div>
+
+      <div class="card">
+        <div class="stack">
+          <div>
+            <label class="field-label">Name</label>
+            <input class="text-input" id="inputName" type="text" placeholder="e.g. Ms. Rivera">
+          </div>
+          <div>
+            <label class="field-label">Subject / grade</label>
+            <input class="text-input" id="inputSubject" type="text" placeholder="e.g. Grade 7–8 English">
+          </div>
+          <div>
+            <label class="field-label">School</label>
+            <input class="text-input" id="inputSchool" type="text" placeholder="e.g. Lincoln MS">
+          </div>
+        </div>
+        <div class="field-error" id="detailsError" hidden>Add your name to continue.</div>
+        <div style="font-size:11.5px; color:var(--text-muted); margin-top:12px;">Saved only in this browser — you can change these later.</div>
+      </div>
+
+      <div class="wizard-nav">
+        <button class="ghost-btn" onclick="goTo('about')">← Back</button>
+        <button class="primary-btn" onclick="saveDetailsAndContinue()">Continue to onboarding →</button>
+      </div>
+    </section>
+
+    <!-- STEP 3: ONBOARDING -->
+    <section class="page" id="page-onboarding-general" hidden>
+      <div class="eyebrow">Step 3 of 5 — Onboarding</div>
+      <h1 id="onboardingGreeting">A little about your year</h1>
+      <div class="sub">Nothing here is shared with anyone — it just helps TeacherBuddy calibrate to your week.</div>
+
+      <div class="card">
+        <h3>How are you feeling about the year so far?</h3>
+        <div class="wellbeing-row" id="wellbeingRow">
+          <button class="wellbeing-chip" data-mood="great" onclick="selectMood('great', this)">🙂 Great</button>
+          <button class="wellbeing-chip" data-mood="okay" onclick="selectMood('okay', this)">😐 Okay</button>
+          <button class="wellbeing-chip" data-mood="struggling" onclick="selectMood('struggling', this)">😣 Struggling</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>One thing you'd like to grow this month</h3>
+        <input class="text-input" id="inputGoal" type="text" placeholder="e.g. Give quieter students more room to talk" onchange="saveOnboarding()">
+      </div>
+
+      <div class="card">
+        <h3>A rough sense of your week</h3>
+        <div class="alloc-row">
+          <div><div class="alloc-q">Teaching</div><div class="alloc-hint">About how many hours did you spend actually teaching or leading instruction?</div></div>
+          <select class="text-input" id="allocTeaching" onchange="saveOnboarding()"><option>0 hrs</option><option>1–2 hrs</option><option>3–5 hrs</option><option>6–8 hrs</option><option selected>9+ hrs</option></select>
+        </div>
+        <div class="alloc-row">
+          <div><div class="alloc-q">Planning &amp; prep</div><div class="alloc-hint">About how many hours went to planning lessons and prepping materials?</div></div>
+          <select class="text-input" id="allocPlanning" onchange="saveOnboarding()"><option>0 hrs</option><option>1–2 hrs</option><option selected>3–5 hrs</option><option>6–8 hrs</option><option>9+ hrs</option></select>
+        </div>
+        <div class="alloc-row">
+          <div><div class="alloc-q">Grading</div><div class="alloc-hint">About how many hours went into grading and giving feedback?</div></div>
+          <select class="text-input" id="allocGrading" onchange="saveOnboarding()"><option>0 hrs</option><option>1–2 hrs</option><option selected>3–5 hrs</option><option>6–8 hrs</option><option>9+ hrs</option></select>
+        </div>
+        <div class="alloc-row">
+          <div><div class="alloc-q">Parent communication</div><div class="alloc-hint">About how many hours on calls, emails, or messages with parents?</div></div>
+          <select class="text-input" id="allocParent" onchange="saveOnboarding()"><option>0 hrs</option><option selected>1–2 hrs</option><option>3–5 hrs</option><option>6–8 hrs</option><option>9+ hrs</option></select>
+        </div>
+        <div class="alloc-row">
+          <div><div class="alloc-q">Meetings</div><div class="alloc-hint">About how many hours in staff or team meetings?</div></div>
+          <select class="text-input" id="allocMeetings" onchange="saveOnboarding()"><option>0 hrs</option><option selected>1–2 hrs</option><option>3–5 hrs</option><option>6–8 hrs</option><option>9+ hrs</option></select>
+        </div>
+        <div class="alloc-row">
+          <div><div class="alloc-q">Admin / paperwork</div><div class="alloc-hint">About how many hours went to admin tasks and paperwork?</div></div>
+          <select class="text-input" id="allocAdmin" onchange="saveOnboarding()"><option>0 hrs</option><option>1–2 hrs</option><option selected>3–5 hrs</option><option>6–8 hrs</option><option>9+ hrs</option></select>
+        </div>
+      </div>
+
+      <div class="wizard-nav">
+        <button class="ghost-btn" onclick="goTo('details')">← Back</button>
+        <button class="primary-btn" onclick="saveOnboarding(); goTo('diarization')">Continue to voice setup →</button>
+      </div>
+    </section>
+
+    <!-- STEP 4: DIARIZATION -->
+    <section class="page" id="page-diarization" hidden>
+      <div class="eyebrow">Step 4 of 5 — Diarization</div>
+      <h1>Let's learn your voice</h1>
+      <div class="sub">TeacherBuddy tells your voice apart from the room — students, other teachers, hallway noise — by comparing everything it hears to a short voice profile from you. Done once, before your first recorded day. This build uses your actual microphone.</div>
+
+      <div class="card mic-status-card">
+        <div class="mic-status-row">
+          <span class="mic-status-dot" id="micStatusDot"></span>
+          <span id="micStatusText">Checking microphone access…</span>
+        </div>
+        <button class="ghost-btn" id="enableMicBtn" onclick="enableMic()">Enable microphone</button>
+      </div>
+
+      <div class="card">
+        <h3>Read this passage aloud <span style="font-weight:400; color:var(--text-muted); font-size:12px;">— each sample records for 10 seconds</span></h3>
+        <div class="passage">"Good morning, everyone. Please take out your notebooks and turn to page forty-two. Today we're going to look at how the author builds tension in the opening chapter."</div>
+
+        <div class="waveform" id="waveform">
+          <span style="height:22%"></span><span style="height:48%"></span><span style="height:30%"></span><span style="height:64%"></span><span style="height:40%"></span>
+          <span style="height:70%"></span><span style="height:35%"></span><span style="height:55%"></span><span style="height:25%"></span><span style="height:60%"></span>
+          <span style="height:45%"></span><span style="height:80%"></span><span style="height:38%"></span><span style="height:52%"></span><span style="height:28%"></span>
+          <span style="height:66%"></span><span style="height:42%"></span><span style="height:58%"></span><span style="height:33%"></span><span style="height:72%"></span>
+          <span style="height:26%"></span><span style="height:50%"></span><span style="height:36%"></span><span style="height:62%"></span><span style="height:20%"></span>
+        </div>
+
+        <div class="row" style="margin-top:14px;">
+          <button class="flag-btn" id="enrollBtn" onclick="startEnroll()" disabled>🎙 Start sample 1 of 3</button>
+          <div class="enroll-progress" id="enrollDots">
+            <span class="dot current" data-i="1"></span>
+            <span class="dot" data-i="2"></span>
+            <span class="dot" data-i="3"></span>
+          </div>
+        </div>
+
+        <div class="field-error" id="enrollError" hidden></div>
+        <div class="stack" id="samplePlaybacks" style="margin-top:10px;"></div>
+
+        <div class="success-banner" id="enrollSuccess">✓ Voice profile created — TeacherBuddy can now tell your voice apart from the room's.</div>
+
+        <label class="consent-row">
+          <input type="checkbox" id="consentBox" onchange="document.getElementById('enrollBtn').disabled = !this.checked;">
+          <span>I understand this voice profile is used only to separate my speech from everyone else's in transcripts — student voices are never enrolled or individually identified, and this recording isn't kept beyond building the profile.</span>
+        </label>
+      </div>
+
+      <div class="wizard-nav">
+        <button class="ghost-btn" onclick="goTo('onboarding')">← Back</button>
+        <span class="mono" style="font-size:12px; color:var(--text-muted);" id="enrollStatus">0 of 3 samples recorded</span>
+        <button class="primary-btn" id="continueBtn" disabled onclick="goTo('privacy')">Continue to privacy &amp; consent →</button>
+      </div>
+    </section>
+
+    <!-- STEP 5: PRIVACY & CONSENT (FERPA) -->
+    <section class="page" id="page-privacy" hidden>
+      <div class="eyebrow">Step 5 of 5 — Privacy &amp; consent</div>
+      <h1>Privacy, consent, and FERPA</h1>
+      <div class="sub">A quick check before you start recording a real classroom.</div>
+
+      <div class="card">
+        <h3>What TeacherBuddy records and keeps</h3>
+        <div class="stack" style="font-size:13.5px; color:var(--text);">
+          <div>Your voice-enrollment samples and any voice notes you record in Reflection stay only in this browser on this device — nothing about those uploads automatically.</div>
+          <div><strong>Live the Day works differently.</strong> While you're recording, TeacherBuddy uses your browser's built-in live speech-to-text (Chrome's "Web Speech" feature) to generate a transcript as you teach, and to auto-flag possible achievements and notable moments from it. To do that, your classroom's audio <em>content</em> is sent to Google's speech-recognition servers to be converted into text — it does leave this device for that one purpose, even though TeacherBuddy itself has no server of its own. The raw audio recording stays on this device only, for you to review or download when you stop recording — it is never uploaded.</div>
+          <div>Achievements and anecdotal records are flagged automatically using simple keyword matching on the transcript, not real understanding of your lesson — review and remove anything inaccurate before you share a weekly report.</div>
+          <div>Typed and voice-note reflections are stored on this device, until you choose to download a PDF report and send it to your coach yourself.</div>
+          <div>This is a personal prototype, not a school system. It isn't connected to your school's student information system, and no one else can see anything here unless you choose to share it.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Your responsibility before recording</h3>
+        <div class="stack" style="font-size:13.5px; color:var(--text);">
+          <div>Because this records real audio of your classroom and sends that audio content to a third-party speech-recognition service to generate text, student voices will likely be captured and processed off-device, not just recorded locally. FERPA and your school or district's own policies govern how student education records are collected, used, and shared — an app setting can't determine that for you. Check with your school on their requirements before using live transcription with real students, and only record when you have the appropriate notice or consent in place for your classroom.</div>
+          <div>When writing reflections you plan to share with your coach, consider referring to students by role or initials rather than full names.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <label class="consent-row" style="margin-top:0;">
+          <input type="checkbox" id="ferpaConsentBox" onchange="document.getElementById('ferpaContinueBtn').disabled = !this.checked;">
+          <span>I understand that TeacherBuddy's written reflections and audio recordings stay on this device, that live transcription during Live the Day sends my classroom's audio content to my browser's speech-recognition service to generate text, and that I'm responsible for following my school or district's policies and FERPA requirements for recording and discussing students.</span>
+        </label>
+      </div>
+
+      <div class="wizard-nav">
+        <button class="ghost-btn" onclick="goTo('diarization')">← Back</button>
+        <button class="primary-btn" id="ferpaContinueBtn" disabled onclick="enterDaily()">Start living my day →</button>
+      </div>
+    </section>
+
+    <!-- DAILY: LIVE THE DAY + REFLECTION -->
+    <section class="page" id="page-daily" hidden>
+      <div class="eyebrow" id="dayEyebrow">End of day — Tuesday</div>
+      <h1>Today, wrapped up</h1>
+      <div class="sub">Live the day, then talk it through in Reflection.</div>
+
+      <div class="tab-switch">
+        <button class="tab-btn active" id="tabBtnLive" onclick="selectTab('live')">Live the Day</button>
+        <button class="tab-btn" id="tabBtnReflection" onclick="selectTab('reflection')">Reflection</button>
+      </div>
+
+      <div id="tab-live">
+        <div class="card record-cta">
+          <div class="record-cta-top">
+            <button class="record-big-btn" id="bigRecordBtn" onclick="toggleBigRecording()">
+              <span class="record-dot" id="bigRecordDot"></span>
+              <span id="bigRecordLabel">Start Recording</span>
+            </button>
+            <div class="record-timer mono" id="bigRecordTimer" hidden>00:00:00</div>
+          </div>
+          <p class="record-guidance">Start recording as soon as your day begins, and stop before you head home. Plan to spend at least 5 minutes in Reflection afterward, talking through what came up.</p>
+          <p class="record-guidance" style="margin-top:2px;">Live transcription needs Google Chrome, an internet connection, and this tab to stay open — keep your laptop plugged in for a full day of recording.</p>
+          <div class="rec-status-line" id="recStatusLine" hidden><span class="rec-status-dot" id="recStatusDot"></span><span id="recStatusText"></span></div>
+          <div class="field-error" id="bigRecordError" hidden></div>
+        </div>
+
+        <div class="card">
+          <h3>Live transcript <span style="font-weight:400; color:var(--text-muted); font-size:12px;">— generated by your browser's speech recognition</span></h3>
+          <div class="live-transcript" id="liveTranscriptBox"><span class="empty-state" id="transcriptEmptyState" style="padding:0;">Nothing transcribed yet this session. Start recording to see live text appear here as you speak — this works in Chrome; other browsers will record audio only, with no live transcript.</span></div>
+        </div>
+
+        <div class="card">
+          <h3>Achievements</h3>
+          <div id="achievementsBody">
+            <div class="empty-state" id="achievementsEmptyState">Nothing logged yet. While recording, TeacherBuddy listens for moments of praise or positive recognition and lists them here automatically — review and remove anything it got wrong.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Anecdotal records <span style="font-weight:400; color:var(--text-muted); font-size:12px;">— yours to correct</span></h3>
+          <div id="anecdotesBody">
+            <div class="empty-state" id="anecdotesEmptyState">No anecdotal records yet today. TeacherBuddy flags possible classroom-management moments and lesson transitions it catches in the transcript — these are simple keyword matches, not real understanding, so correct or remove anything inaccurate.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Idle time</h3>
+          <div id="idleBody">
+            <div class="empty-state" id="idleEmptyState">No quiet stretches identified yet. TeacherBuddy marks a stretch here when it goes 5+ minutes during a recording without detecting any speech — an approximation, not a true measure of what was happening in the room.</div>
+          </div>
+        </div>
+
+        <div class="wizard-nav" style="justify-content:flex-end;">
+          <button class="primary-btn" onclick="selectTab('reflection')">Go to Reflection →</button>
+        </div>
+      </div>
+
+      <div id="tab-reflection" hidden>
+        <div class="card">
+          <h3>TeacherBuddy checked in</h3>
+          <div class="chat" id="checkinChat">
+            <div class="empty-state" id="checkinEmptyState">No check-in yet — TeacherBuddy would ask about anything notable from your recording once it's analyzed. For now, record a voice note or type your own reflection below.</div>
+          </div>
+
+          <div class="reply-row">
+            <button class="ghost-btn" id="recordBtn" onclick="toggleRecorder()">🎙 Record a voice note</button>
+            <button class="ghost-btn" onclick="toggleTyping()">⌨ Type a reply</button>
+          </div>
+          <div class="field-error" id="checkinError" hidden></div>
+          <div class="dialog" id="typingDialog">
+            <textarea class="edit-textarea" placeholder="Type your reply…" style="min-height:56px; margin-top:0;"></textarea>
+            <div class="actions"><button class="chip-btn primary" onclick="sendTypedReply()">Send reply</button></div>
+          </div>
+        </div>
+
+        <div class="success-banner" id="submitSuccess">✓ Reflection submitted for today.</div>
+
+        <div class="wizard-nav">
+          <button class="ghost-btn" onclick="selectTab('live')">← Back to Live the Day</button>
+          <button class="primary-btn" id="submitBtn" onclick="submitReflection()">Submit reflection →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- WEEKLY REFLECTION -->
+    <section class="page" id="page-weekly" hidden>
+      <div class="eyebrow">Reflection · This week</div>
+      <h1>Time to reflect on the week</h1>
+      <div class="sub">Built from what you actually recorded and wrote this week on this device — not a demo. Share it with your coach below.</div>
+
+      <div class="card">
+        <h3>This week at a glance</h3>
+        <div id="weekSummaryBody" class="stack"></div>
+      </div>
+
+      <div class="card">
+        <h3>Self-reported time this week</h3>
+        <div id="weekAllocBody"></div>
+      </div>
+
+      <div class="card">
+        <h3>Send to your coach</h3>
+        <p style="margin:0 0 12px; font-size:13px; color:var(--text-muted);">TeacherBuddy doesn't send anything automatically — this device is the only place your data lives. Download a PDF of this week's report and email or share it with your coach yourself. It includes the same real numbers above, plus your written reflections — no audio, just text and counts.</p>
+        <div class="row" style="flex-wrap:wrap; gap:8px; justify-content:flex-start;">
+          <button class="chip-btn primary" onclick="downloadPdfReport()">Download PDF report</button>
+          <span id="pdfStatus" style="font-size:12px; color:var(--text-muted);"></span>
+        </div>
+      </div>
+
+      <div class="wizard-nav" style="justify-content:flex-start;">
+        <button class="ghost-btn" onclick="selectDay('mon')">← Back to the week</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Print-only weekly report. Hidden on screen; shown (and only this) when window.print() runs. -->
+<div id="printReport"></div>
+
+<div class="modal-overlay" id="changelogModal" hidden onclick="if(event.target===this) this.hidden=true">
+  <div class="modal-card">
+    <button class="close-x" onclick="document.getElementById('changelogModal').hidden=true">×</button>
+    <h3>Version history</h3>
+    <div class="current-build">This build: <strong>v3.0 — finalized</strong> · Oct 3, 2026. Live the Day records continuously and, in Chrome, transcribes live — real microphone audio and real speech-to-text, with a simple keyword matcher auto-flagging achievements, anecdotal moments, and quiet stretches. Diarization (telling speakers apart) is still simulated — that needs a backend speech model this static prototype doesn't have.</div>
+    <div class="version-entry"><span class="tag">v3.0</span><span class="date">Oct 3, 2026</span><p>Live the Day now actually records continuously: the Start/Stop button captures real low-bitrate audio for the whole session (downloadable as a file once you stop) and, in Chrome, runs live speech-to-text the whole time using the browser's built-in Web Speech feature — restarting itself automatically through long sessions. A simple keyword matcher scans the live transcript to auto-flag Achievements (praise and positive moments) and Anecdotal records (classroom-management moments, lesson transitions), and Idle time now flags real 5+ minute stretches with no detected speech, instead of staying empty. Important: live transcription sends your classroom's audio content to your browser's cloud speech-recognition service (Google's, via Chrome) to generate text — a real change in what leaves this device, spelled out on the updated Privacy &amp; Consent step. Auto-flagged items are simple keyword matches, not verified understanding, so review and remove anything inaccurate.</p></div>
+    <div class="version-entry"><span class="tag">v2.9</span><span class="date">Oct 3, 2026</span><p>Replaced the copy-paste text summary on Weekly Reflection with a "Download PDF report" button — it opens your browser's print dialog pre-filled with a clean, readable weekly report (days recorded, time, mood, goal, hour allocations, and your written reflections) that you can save as a PDF and email to your coach directly. TeacherBuddy Coach is no longer part of the main workflow as a result.</p></div>
+    <div class="version-entry"><span class="tag">v2.8</span><span class="date">Oct 3, 2026</span><p>Added "Teaching" as its own category in "A rough sense of your week" — actual instruction time was missing from the hour breakdown. It's now saved, shown on the Weekly Reflection page, and included in the coach export alongside the other categories.</p></div>
+    <div class="version-entry"><span class="tag">v2.7</span><span class="date">Oct 3, 2026</span><p>Added a Privacy &amp; Consent step (5 of 5) after Diarization, explaining what's recorded and kept (on-device only), and requiring a one-time acknowledgment that you're responsible for following your school/district's policies and FERPA requirements before you can start living your day. This app can't determine FERPA compliance for you — it's a reminder and consent gate, not a legal certification.</p></div>
+    <div class="version-entry"><span class="tag">v2.6</span><span class="date">Oct 3, 2026</span><p>Weekly Reflection now reflects what actually happened this week — days recorded, total time, written and voice-note replies, your mood and goal from onboarding, and your self-reported hour allocations — instead of sample numbers. Added a "Share with your coach" card that builds a copyable summary (no audio, just text and counts) for you to send your coach yourself; nothing leaves this device automatically. Pairs with the new TeacherBuddy Coach app, which a coach can paste these summaries into.</p></div>
+    <div class="version-entry"><span class="tag">v2.5</span><span class="date">Sep 22, 2026</span><p>Each voice-enrollment sample during Diarization now records for 10 seconds instead of 3, with a live countdown on the button, giving you more room to read the passage naturally.</p></div>
+    <div class="version-entry"><span class="tag">v2.4</span><span class="date">Sep 22, 2026</span><p>Live the Day and Reflection now start genuinely empty instead of showing sample achievements, anecdotes, an idle-time breakdown, and a canned check-in conversation — since this prototype has no real analysis pipeline behind the recording yet, it no longer pretends one ran. Achievements, anecdotal records, and idle time now show honest "nothing yet" messages, and the Reflection check-in starts blank until you record a voice note or type your own reply.</p></div>
+    <div class="version-entry"><span class="tag">v2.3</span><span class="date">Sep 22, 2026</span><p>Added a live microphone status indicator and an "Enable microphone" button on the Diarization page, so you can trigger the browser's permission prompt on demand and see plainly whether the mic is allowed, blocked, or not yet requested. Error messages now explain that changed browser settings often need a page reload, and that a mic block inside an embedded chat preview usually means opening this page in its own full browser tab. Also updated "A rough sense of your week" to hour-range dropdowns (0, 1–2, 3–5, 6–8, 9+ hrs) with a guiding time-management question per category, replacing Low/Medium/High.</p></div>
+    <div class="version-entry"><span class="tag">v2.2</span><span class="date">Sep 22, 2026</span><p>Redesigned in navy + Helvetica for a sleeker, simpler look. Restructured setup into four steps — About, Your Details, Onboarding, Diarization — followed by a daily Live the Day / Reflection tab pattern running Monday through Friday, each ending with a Submit action, plus a separate Weekly Reflection for the weekend. Live the Day now opens with a big Start/Stop Recording button and a live timer, with on-screen guidance: start recording when the day begins, stop before heading home, and spend at least 5 minutes in Reflection afterward.</p></div>
+    <div class="version-entry"><span class="tag">v2.1</span><span class="date">Sep 17, 2026</span><p>Added an editable teacher profile (name, subject/grade, school).</p></div>
+    <div class="version-entry"><span class="tag">v2.0</span><span class="date">Sep 17, 2026</span><p>Finalized build: real microphone recording via getUserMedia/MediaRecorder for the voice-enrollment samples and check-in voice notes, with playback and a clear on-screen message if the mic is denied or blocked.</p></div>
+    <div class="version-entry" style="border-bottom:none;"><span class="date">Earlier structural history (six-tab prototype → linear wizard) matches the mockup's v1.0–v1.3 — see that build's version history.</span></div>
+  </div>
+</div>
+
+<script>
+  // ---------- Setup wizard (steps 1–4) ----------
+  const setupOrder = ['about','details','onboarding','diarization','privacy'];
+  const stepLabels = {
+    about: 'Step 1 of 5 · About',
+    details: 'Step 2 of 5 · Your details',
+    onboarding: 'Step 3 of 5 · Onboarding',
+    diarization: 'Step 4 of 5 · Diarization',
+    privacy: 'Step 5 of 5 · Privacy & consent'
+  };
+  const pageIdFor = { about:'page-about', details:'page-details', onboarding:'page-onboarding-general', diarization:'page-diarization', privacy:'page-privacy' };
+
+  function goTo(id){
+    setupOrder.forEach(p => { document.getElementById(pageIdFor[p]).hidden = (p !== id); });
+    document.getElementById('page-daily').hidden = true;
+    document.getElementById('page-weekly').hidden = true;
+    document.getElementById('stepLabel').textContent = stepLabels[id];
+    document.getElementById('progressTrack').hidden = false;
+    document.getElementById('dayStrip').hidden = true;
+    const idx = setupOrder.indexOf(id);
+    document.getElementById('progressFill').style.width = (((idx + 1) / setupOrder.length) * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+  }
+
+  function saveDetailsAndContinue(){
+    const name = document.getElementById('inputName').value.trim();
+    if (!name){
+      document.getElementById('detailsError').hidden = false;
+      return;
+    }
+    document.getElementById('detailsError').hidden = true;
+    saveProfile();
+    document.getElementById('onboardingGreeting').textContent = 'A little about your year, ' + name + '.';
+    goTo('onboarding');
+  }
+
+  function selectMood(mood, btn){
+    document.querySelectorAll('#wellbeingRow .wellbeing-chip').forEach(c => c.classList.remove('selected'));
+    btn.classList.add('selected');
+    saveOnboarding();
+  }
+
+  // ---------- Profile + onboarding (persisted locally, this device only) ----------
+  const DEFAULT_PROFILE = { name: '', subject: '', school: '' };
+  function applyProfile(p){
+    document.getElementById('inputName').value = p.name;
+    document.getElementById('inputSubject').value = p.subject;
+    document.getElementById('inputSchool').value = p.school;
+  }
+  function loadProfile(){
+    applyProfile(getProfile());
+  }
+  function getProfile(){
+    let p = DEFAULT_PROFILE;
+    try {
+      const saved = localStorage.getItem('teacherbuddy_profile');
+      if (saved) p = Object.assign({}, DEFAULT_PROFILE, JSON.parse(saved));
+    } catch (e){ /* private window or blocked storage — fall back to defaults */ }
+    return p;
+  }
+  function saveProfile(){
+    const p = {
+      name: document.getElementById('inputName').value.trim(),
+      subject: document.getElementById('inputSubject').value.trim(),
+      school: document.getElementById('inputSchool').value.trim()
+    };
+    try { localStorage.setItem('teacherbuddy_profile', JSON.stringify(p)); } catch (e){ /* best effort only */ }
+  }
+
+  function saveOnboarding(){
+    const moodBtn = document.querySelector('#wellbeingRow .wellbeing-chip.selected');
+    const o = {
+      mood: moodBtn ? moodBtn.dataset.mood : '',
+      goal: document.getElementById('inputGoal').value.trim(),
+      allocations: {
+        teaching: document.getElementById('allocTeaching').value,
+        planning: document.getElementById('allocPlanning').value,
+        grading: document.getElementById('allocGrading').value,
+        parentComm: document.getElementById('allocParent').value,
+        meetings: document.getElementById('allocMeetings').value,
+        admin: document.getElementById('allocAdmin').value
+      }
+    };
+    try { localStorage.setItem('teacherbuddy_onboarding', JSON.stringify(o)); } catch (e){ /* best effort only */ }
+  }
+  function getOnboarding(){
+    try {
+      const saved = localStorage.getItem('teacherbuddy_onboarding');
+      if (saved) return JSON.parse(saved);
+    } catch (e){ /* best effort only */ }
+    return { mood: '', goal: '', allocations: {} };
+  }
+  function loadOnboarding(){
+    const o = getOnboarding();
+    if (o.goal) document.getElementById('inputGoal').value = o.goal;
+    if (o.mood){
+      const btn = document.querySelector('#wellbeingRow .wellbeing-chip[data-mood="' + o.mood + '"]');
+      if (btn){
+        document.querySelectorAll('#wellbeingRow .wellbeing-chip').forEach(c => c.classList.remove('selected'));
+        btn.classList.add('selected');
+      }
+    }
+    const a = o.allocations || {};
+    if (a.teaching) document.getElementById('allocTeaching').value = a.teaching;
+    if (a.planning) document.getElementById('allocPlanning').value = a.planning;
+    if (a.grading) document.getElementById('allocGrading').value = a.grading;
+    if (a.parentComm) document.getElementById('allocParent').value = a.parentComm;
+    if (a.meetings) document.getElementById('allocMeetings').value = a.meetings;
+    if (a.admin) document.getElementById('allocAdmin').value = a.admin;
+  }
+  loadProfile();
+  loadOnboarding();
+
+  // ---------- Diarization (real microphone recording) ----------
+  // Shared mic helper: resolves with a live MediaStream, or shows an inline
+  // error and resolves null, so every record button fails the same,
+  // explicit way instead of silently doing nothing.
+  async function getMic(errorElId){
+    const el = document.getElementById(errorElId);
+    if (el) el.hidden = true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      if (el){ el.textContent = 'This browser (or this embedded preview) doesn\'t expose microphone access. Try opening this page directly in a full browser tab.'; el.hidden = false; }
+      return null;
+    }
+    try {
+      return await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err){
+      if (el){
+        if (err && err.name === 'NotAllowedError'){
+          el.textContent = 'Microphone permission was denied. If you already allowed it in your browser\'s site settings, reload this page — permission changes often need a refresh. If this page is inside a chat preview or embedded frame, open it in its own full browser tab instead: embedded previews commonly block the microphone no matter what you allow at the browser level.';
+        } else if (err && err.name === 'NotFoundError'){
+          el.textContent = 'No microphone was found on this device.';
+        } else {
+          el.textContent = 'Couldn\'t start recording (' + (err && err.name ? err.name : 'an unknown error') + '). Try the "Enable microphone" button above, or reload the page.';
+        }
+        el.hidden = false;
+      }
+      refreshMicStatus();
+      return null;
+    }
+  }
+
+  // Live status pill + explicit trigger: clicking "Enable microphone" fires
+  // the browser's real permission prompt at a clear, predictable moment,
+  // and reports back plainly instead of leaving a silent failure.
+  async function refreshMicStatus(){
+    const statusEl = document.getElementById('micStatusText');
+    const dot = document.getElementById('micStatusDot');
+    if (!statusEl) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      statusEl.textContent = 'Microphone access isn\'t available in this browser or preview. Try opening this page in its own full browser tab.';
+      dot.className = 'mic-status-dot denied';
+      return;
+    }
+    if (navigator.permissions && navigator.permissions.query){
+      try {
+        const status = await navigator.permissions.query({ name: 'microphone' });
+        applyMicStatus(status.state);
+        status.onchange = () => applyMicStatus(status.state);
+        return;
+      } catch (e){ /* some browsers can't query 'microphone' this way — fall through */ }
+    }
+    applyMicStatus('prompt');
+  }
+  function applyMicStatus(state){
+    const statusEl = document.getElementById('micStatusText');
+    const dot = document.getElementById('micStatusDot');
+    if (!statusEl) return;
+    dot.className = 'mic-status-dot ' + (state === 'granted' ? 'granted' : state === 'denied' ? 'denied' : 'prompt');
+    if (state === 'granted') statusEl.textContent = 'Microphone is enabled for this page.';
+    else if (state === 'denied') statusEl.textContent = 'Microphone is blocked for this page. Click "Enable microphone," or check your browser\'s site settings and reload.';
+    else statusEl.textContent = 'Microphone hasn\'t been requested yet — click "Enable microphone" to allow it.';
+  }
+  async function enableMic(){
+    const btn = document.getElementById('enableMicBtn');
+    btn.disabled = true;
+    btn.textContent = 'Requesting…';
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop());
+      applyMicStatus('granted');
+    } catch (err){
+      const el = document.getElementById('micStatusText');
+      if (err && err.name === 'NotAllowedError'){
+        el.textContent = 'Microphone access was blocked. If you already allowed it in your browser\'s site settings, reload this page — permission changes often need a refresh. If you\'re viewing this inside a chat preview or embedded frame, open the page in its own full browser tab instead — embedded previews commonly block the microphone no matter what you allow at the browser level.';
+      } else if (err && err.name === 'NotFoundError'){
+        el.textContent = 'No microphone was found on this device.';
+      } else {
+        el.textContent = 'Couldn\'t enable the microphone (' + (err && err.name ? err.name : 'unknown error') + ').';
+      }
+      document.getElementById('micStatusDot').className = 'mic-status-dot denied';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Enable microphone';
+  }
+  refreshMicStatus();
+
+  let enrollStep = 0;
+  async function startEnroll(){
+    if (enrollStep >= 3) return;
+    const btn = document.getElementById('enrollBtn');
+    const wave = document.getElementById('waveform');
+    const priorLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Requesting microphone…';
+
+    const stream = await getMic('enrollError');
+    if (!stream){ btn.disabled = false; btn.textContent = priorLabel; return; }
+
+    const ENROLL_SECONDS = 10;
+    let secondsLeft = ENROLL_SECONDS;
+    btn.textContent = '● Recording sample ' + (enrollStep + 1) + ' of 3… ' + secondsLeft + 's';
+    wave.classList.add('active');
+
+    const chunks = [];
+    let recorder;
+    try {
+      recorder = new MediaRecorder(stream);
+    } catch (err){
+      stream.getTracks().forEach(t => t.stop());
+      wave.classList.remove('active');
+      const el = document.getElementById('enrollError');
+      el.textContent = 'Your browser couldn\'t start a recorder (' + (err && err.name ? err.name : 'error') + ').';
+      el.hidden = false;
+      btn.disabled = false; btn.textContent = priorLabel;
+      return;
+    }
+    const countdown = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft > 0) btn.textContent = '● Recording sample ' + (enrollStep + 1) + ' of 3… ' + secondsLeft + 's';
+    }, 1000);
+    recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      clearInterval(countdown);
+      stream.getTracks().forEach(t => t.stop());
+      wave.classList.remove('active');
+      enrollStep++;
+
+      const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      const row = document.createElement('div');
+      row.className = 'sample-playback';
+      row.innerHTML = '<span class="mono">Sample ' + enrollStep + '</span>';
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.src = url;
+      row.appendChild(audio);
+      document.getElementById('samplePlaybacks').appendChild(row);
+
+      const dot = document.querySelector('.enroll-progress .dot[data-i="' + enrollStep + '"]');
+      if (dot){ dot.classList.remove('current'); dot.classList.add('done'); }
+      const nextDot = document.querySelector('.enroll-progress .dot[data-i="' + (enrollStep + 1) + '"]');
+      if (nextDot) nextDot.classList.add('current');
+      document.getElementById('enrollStatus').textContent = enrollStep + ' of 3 samples recorded';
+
+      if (enrollStep < 3){
+        btn.disabled = false;
+        btn.textContent = '🎙 Start sample ' + (enrollStep + 1) + ' of 3';
+      } else {
+        btn.textContent = '✓ All samples recorded';
+        document.getElementById('enrollSuccess').classList.add('show');
+        document.getElementById('continueBtn').disabled = false;
+      }
+    };
+    recorder.start();
+    setTimeout(() => { if (recorder.state !== 'inactive') recorder.stop(); }, ENROLL_SECONDS * 1000);
+  }
+
+  // ---------- Daily shell (day strip + Live the Day / Reflection tabs) ----------
+  const dayLabels = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
+  const DAYS = ['mon','tue','wed','thu','fri'];
+  let currentDay = 'tue';
+
+  // ---------- Week data (this device only) — what actually happened this week,
+  // tracked from real actions (recording, replies) so the weekly summary and the
+  // coach export reflect reality instead of canned numbers. ----------
+  function emptyDay(){ return { recordedSeconds: 0, recorded: false, replies: [], voiceNotes: 0, achievements: [], anecdotes: [], idleStretches: [] }; }
+  function loadWeekData(){
+    let w = null;
+    try {
+      const saved = localStorage.getItem('teacherbuddy_week');
+      if (saved) w = JSON.parse(saved);
+    } catch (e){ /* best effort only */ }
+    if (!w || typeof w !== 'object') w = {};
+    DAYS.forEach(d => {
+      // Merge onto a fresh emptyDay() so weeks saved by older versions (before
+      // achievements/anecdotes/idleStretches existed) gain those fields instead
+      // of crashing the first time this build reads them.
+      w[d] = Object.assign(emptyDay(), w[d] || {});
+      if (!Array.isArray(w[d].achievements)) w[d].achievements = [];
+      if (!Array.isArray(w[d].anecdotes)) w[d].anecdotes = [];
+      if (!Array.isArray(w[d].idleStretches)) w[d].idleStretches = [];
+    });
+    return w;
+  }
+  function saveWeekData(w){
+    try { localStorage.setItem('teacherbuddy_week', JSON.stringify(w)); } catch (e){ /* best effort only */ }
+  }
+  function logRecordedSeconds(day, seconds){
+    if (!seconds) return;
+    const w = loadWeekData();
+    w[day].recordedSeconds += seconds;
+    w[day].recorded = true;
+    saveWeekData(w);
+  }
+  function logReply(day, text){
+    const w = loadWeekData();
+    w[day].replies.push({ text: text, at: stampNow() });
+    saveWeekData(w);
+  }
+  function logVoiceNote(day){
+    const w = loadWeekData();
+    w[day].voiceNotes++;
+    saveWeekData(w);
+  }
+
+  // ---------- Weekly summary + coach export (built from real week data above) ----------
+  const ALLOC_LABELS = { teaching: 'Teaching', planning: 'Planning & prep', grading: 'Grading', parentComm: 'Parent communication', meetings: 'Meetings', admin: 'Admin / paperwork' };
+  const MOOD_LABELS = { great: '🙂 Great', okay: '😐 Okay', struggling: '😣 Struggling' };
+
+  function renderWeeklySummary(){
+    const w = loadWeekData();
+    const onboarding = getOnboarding();
+    const profile = getProfile();
+
+    const daysRecorded = DAYS.filter(d => w[d].recorded).length;
+    const totalSeconds = DAYS.reduce((sum, d) => sum + w[d].recordedSeconds, 0);
+    const totalReplies = DAYS.reduce((sum, d) => sum + w[d].replies.length, 0);
+    const totalVoiceNotes = DAYS.reduce((sum, d) => sum + w[d].voiceNotes, 0);
+    const totalAchievements = DAYS.reduce((sum, d) => sum + w[d].achievements.length, 0);
+    const totalAnecdotes = DAYS.reduce((sum, d) => sum + w[d].anecdotes.length, 0);
+    const totalIdleStretches = DAYS.reduce((sum, d) => sum + w[d].idleStretches.length, 0);
+    const hh = Math.floor(totalSeconds / 3600);
+    const mm = Math.floor((totalSeconds % 3600) / 60);
+    const totalTimeLabel = totalSeconds > 0 ? ((hh > 0 ? hh + 'h ' : '') + mm + 'm') : 'None yet';
+
+    const rows = [
+      ['Days recorded', daysRecorded + ' of 5'],
+      ['Total time recorded', totalTimeLabel],
+      ['Written reflections', String(totalReplies)],
+      ['Voice-note replies', String(totalVoiceNotes)],
+      ['Achievements flagged', String(totalAchievements)],
+      ['Anecdotal records flagged', String(totalAnecdotes)],
+      ['Quiet stretches flagged', String(totalIdleStretches)],
+      ['Mood entering the week', MOOD_LABELS[onboarding.mood] || 'Not set'],
+      ['Goal for the month', onboarding.goal || 'Not set']
+    ];
+    const body = document.getElementById('weekSummaryBody');
+    body.innerHTML = '';
+    rows.forEach(([label, val]) => {
+      const row = document.createElement('div');
+      row.className = 'week-block';
+      row.innerHTML = '<div class="count" style="font-size:15px;">' + val + '</div><div class="desc">' + label + '</div>';
+      body.appendChild(row);
+    });
+
+    const allocBody = document.getElementById('weekAllocBody');
+    allocBody.innerHTML = '';
+    const a = onboarding.allocations || {};
+    Object.keys(ALLOC_LABELS).forEach(key => {
+      const row = document.createElement('div');
+      row.className = 'alloc-row';
+      row.innerHTML = '<span>' + ALLOC_LABELS[key] + '</span><span class="mono">' + (a[key] || '—') + '</span>';
+      allocBody.appendChild(row);
+    });
+
+    window._weeklyReportData = { profile, onboarding, w, daysRecorded, totalSeconds, totalReplies, totalVoiceNotes, totalTimeLabel, totalAchievements, totalAnecdotes, totalIdleStretches };
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  function buildPrintReport(){
+    const d = window._weeklyReportData;
+    if (!d) return;
+    const { profile, onboarding, w, daysRecorded, totalSeconds, totalReplies, totalVoiceNotes, totalTimeLabel, totalAchievements, totalAnecdotes, totalIdleStretches } = d;
+    const dayLabelsFull = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
+
+    let html = '';
+    html += '<h1>TeacherBuddy — Weekly Report</h1>';
+    html += '<div class="pr-meta">' + escapeHtml(profile.name || '(no name set)') +
+      (profile.subject ? ' · ' + escapeHtml(profile.subject) : '') +
+      (profile.school ? ' · ' + escapeHtml(profile.school) : '') +
+      '<br>Generated ' + new Date().toLocaleString() + '</div>';
+
+    html += '<h2>This week at a glance</h2><table>';
+    [
+      ['Days recorded', daysRecorded + ' of 5'],
+      ['Total time recorded', totalTimeLabel],
+      ['Written reflections', String(totalReplies)],
+      ['Voice-note replies', String(totalVoiceNotes)],
+      ['Achievements flagged', String(totalAchievements)],
+      ['Anecdotal records flagged', String(totalAnecdotes)],
+      ['Quiet stretches flagged', String(totalIdleStretches)],
+      ['Mood entering the week', MOOD_LABELS[onboarding.mood] || 'Not set'],
+      ['Goal for the month', onboarding.goal || 'Not set']
+    ].forEach(([lbl, val]) => {
+      html += '<tr><td class="pr-label">' + lbl + '</td><td class="pr-val">' + escapeHtml(String(val)) + '</td></tr>';
+    });
+    html += '</table>';
+
+    html += '<h2>Self-reported time this week</h2><table>';
+    const a = onboarding.allocations || {};
+    Object.keys(ALLOC_LABELS).forEach(key => {
+      html += '<tr><td class="pr-label">' + ALLOC_LABELS[key] + '</td><td class="pr-val">' + escapeHtml(a[key] || '—') + '</td></tr>';
+    });
+    html += '</table>';
+
+    html += '<h2>Written reflections</h2>';
+    let anyReplies = false;
+    DAYS.forEach(dk => {
+      (w[dk].replies || []).forEach(r => {
+        anyReplies = true;
+        html += '<div class="pr-reply"><span class="pr-day">' + dayLabelsFull[dk] + ':</span>' + escapeHtml(r.text) + '</div>';
+      });
+    });
+    if (!anyReplies) html += '<div class="pr-empty">No written reflections this week.</div>';
+
+    html += '<h2>Achievements &amp; notable moments flagged this week</h2>';
+    let anyFlags = false;
+    DAYS.forEach(dk => {
+      (w[dk].achievements || []).forEach(a => {
+        anyFlags = true;
+        html += '<div class="pr-reply"><span class="pr-day">' + dayLabelsFull[dk] + ' · ' + escapeHtml(a.label) + ':</span>' + escapeHtml(a.text || '') + '</div>';
+      });
+      (w[dk].anecdotes || []).forEach(a => {
+        anyFlags = true;
+        html += '<div class="pr-reply"><span class="pr-day">' + dayLabelsFull[dk] + ' · ' + escapeHtml(a.label) + ':</span>' + escapeHtml(a.text || '') + '</div>';
+      });
+    });
+    if (!anyFlags) html += '<div class="pr-empty">Nothing auto-flagged this week.</div>';
+
+    html += '<div class="pr-footer">Prepared from data stored only on this teacher\'s device — no audio recordings are included, only text summaries and reflections the teacher chose to write. Achievements and notable moments are auto-flagged from a live transcript using simple keyword matching, not verified understanding, and may have been corrected or removed by the teacher before this report was generated. TeacherBuddy is a personal prototype, not a school system.</div>';
+
+    document.getElementById('printReport').innerHTML = html;
+  }
+
+  function downloadPdfReport(){
+    const statusEl = document.getElementById('pdfStatus');
+    buildPrintReport();
+    statusEl.textContent = 'Opening print dialog — choose "Save as PDF" as the destination.';
+    setTimeout(() => window.print(), 50);
+  }
+
+  function enterDaily(){
+    setupOrder.forEach(p => { document.getElementById(pageIdFor[p]).hidden = true; });
+    document.getElementById('progressTrack').hidden = true;
+    document.getElementById('dayStrip').hidden = false;
+    document.getElementById('stepLabel').textContent = 'Daily use';
+    selectDay('tue');
+  }
+
+  function selectDay(day){
+    document.querySelectorAll('.day-pill').forEach(p => p.classList.remove('active'));
+    const pill = document.querySelector('.day-pill[data-day="' + day + '"]');
+    if (pill) pill.classList.add('active');
+
+    if (day === 'weekly'){
+      document.getElementById('page-daily').hidden = true;
+      document.getElementById('page-weekly').hidden = false;
+      renderWeeklySummary();
+    } else {
+      currentDay = day;
+      document.getElementById('page-weekly').hidden = true;
+      document.getElementById('page-daily').hidden = false;
+      document.getElementById('dayEyebrow').textContent = 'End of day — ' + dayLabels[day];
+      selectTab('live');
+      renderDailyPanels();
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+  }
+
+  function selectTab(tab){
+    const live = tab === 'live';
+    document.getElementById('tab-live').hidden = !live;
+    document.getElementById('tab-reflection').hidden = live;
+    document.getElementById('tabBtnLive').classList.toggle('active', live);
+    document.getElementById('tabBtnReflection').classList.toggle('active', !live);
+  }
+
+  let bigRecording = false;
+  let bigRecordInterval = null;
+  let bigRecordSeconds = 0;
+  function updateBigTimer(){
+    const h = String(Math.floor(bigRecordSeconds / 3600)).padStart(2,'0');
+    const m = String(Math.floor((bigRecordSeconds % 3600) / 60)).padStart(2,'0');
+    const s = String(bigRecordSeconds % 60).padStart(2,'0');
+    document.getElementById('bigRecordTimer').textContent = h + ':' + m + ':' + s;
+  }
+
+  // ---------- Live the Day: real continuous recording + live speech-to-text ----------
+  // Two things run side by side while "recording": a MediaRecorder capturing the
+  // actual audio at a low, speech-only bitrate (kept on-device, downloadable when
+  // you stop), and — in Chrome — the browser's built-in SpeechRecognition turning
+  // speech into text live. That text is what gets scanned for achievements,
+  // anecdotal moments, and quiet stretches. Neither pipeline is real NLP: the
+  // "detection" below is a plain keyword matcher, on purpose kept simple and
+  // visible rather than pretending to understand the lesson.
+  const RECORD_AUDIO_BITRATE = 24000; // ~24 kbps mono-ish — small files, still intelligible speech
+  const QUIET_THRESHOLD_MS = 5 * 60 * 1000; // 5+ minutes with no detected speech = a flagged quiet stretch
+  let bigStream = null;
+  let bigRecorder = null;
+  let bigAudioChunks = [];
+  let bigRecognition = null;
+  const recognitionSupported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  let lastSpeechAt = 0;
+  let quietSince = null;
+  let idleWatcherInterval = null;
+
+  function setRecStatus(text, live){
+    const line = document.getElementById('recStatusLine');
+    if (!line) return;
+    line.hidden = false;
+    document.getElementById('recStatusText').textContent = text;
+    document.getElementById('recStatusDot').classList.toggle('live', !!live);
+  }
+
+  // Deliberately simple keyword matching — not real language understanding.
+  // Each utterance can match more than one category.
+  function classifyUtterance(text){
+    const t = text.toLowerCase();
+    const hits = [];
+    if (/\b(great job|well done|awesome|nice work|fantastic job|excellent work|way to go|really proud|i'?m proud|i am proud)\b/.test(t)){
+      hits.push({ type: 'achievement', label: 'Positive recognition' });
+    }
+    if (/\b(settle down|eyes on me|quiet please|stop talking|inside voices|focus please|let'?s refocus|volume down)\b/.test(t)){
+      hits.push({ type: 'anecdote', label: 'Classroom management moment' });
+    }
+    if (/\b(let'?s move on|next we'?re going to|next we are going to|take out your|turn to page|open your book|open your notebook|put away your)\b/.test(t)){
+      hits.push({ type: 'anecdote', label: 'Lesson transition' });
+    }
+    return hits;
+  }
+
+  function appendTranscript(text, isFinal){
+    const box = document.getElementById('liveTranscriptBox');
+    if (!box) return;
+    const emptyEl = document.getElementById('transcriptEmptyState');
+    if (emptyEl) emptyEl.remove();
+    let interimEl = document.getElementById('transcriptInterim');
+    if (isFinal){
+      if (interimEl) interimEl.remove();
+      const span = document.createElement('span');
+      span.textContent = text + ' ';
+      box.appendChild(span);
+    } else {
+      if (!interimEl){
+        interimEl = document.createElement('span');
+        interimEl.id = 'transcriptInterim';
+        interimEl.className = 'interim';
+        box.appendChild(interimEl);
+      }
+      interimEl.textContent = text;
+    }
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function renderAutoItem(containerId, item, kind){
+    const row = document.createElement('div');
+    row.className = 'auto-item ' + kind;
+    row.innerHTML = '<span class="dot"></span>' +
+      '<div class="body"><div>' + escapeHtml(item.label) + (item.text ? ': "' + escapeHtml(item.text) + '"' : '') + '</div>' +
+      '<div class="meta">' + escapeHtml(item.at) + ' · auto-flagged</div></div>' +
+      '<button class="remove-btn" title="Remove">✕</button>';
+    row.querySelector('.remove-btn').onclick = () => row.remove();
+    document.getElementById(containerId).appendChild(row);
+  }
+  function renderIdleItem(entry){
+    const row = document.createElement('div');
+    row.className = 'idle-item';
+    row.innerHTML = '<span>Quiet stretch ending around ' + escapeHtml(entry.at) + '</span><span class="dur">~' + entry.minutes + ' min</span>';
+    document.getElementById('idleBody').appendChild(row);
+  }
+
+  function logAchievement(day, label, text){
+    const w = loadWeekData();
+    const entry = { label, text, at: stampNow() };
+    w[day].achievements.push(entry);
+    saveWeekData(w);
+    if (day === currentDay){
+      const emptyEl = document.getElementById('achievementsEmptyState');
+      if (emptyEl) emptyEl.remove();
+      renderAutoItem('achievementsBody', entry, 'achievement');
+    }
+  }
+  function logAnecdote(day, label, text){
+    const w = loadWeekData();
+    const entry = { label, text, at: stampNow() };
+    w[day].anecdotes.push(entry);
+    saveWeekData(w);
+    if (day === currentDay){
+      const emptyEl = document.getElementById('anecdotesEmptyState');
+      if (emptyEl) emptyEl.remove();
+      renderAutoItem('anecdotesBody', entry, 'anecdote');
+    }
+  }
+  function logIdleStretch(day, minutes){
+    const w = loadWeekData();
+    const entry = { minutes, at: stampNow() };
+    w[day].idleStretches.push(entry);
+    saveWeekData(w);
+    if (day === currentDay){
+      const emptyEl = document.getElementById('idleEmptyState');
+      if (emptyEl) emptyEl.remove();
+      renderIdleItem(entry);
+    }
+  }
+
+  // Rebuilds the Achievements / Anecdotal records / Idle time cards for
+  // whichever day is current — called on every day switch. The live transcript
+  // box is session-only (like the enrollment/voice-note audio elsewhere in this
+  // prototype) and isn't persisted, so it resets when you switch days.
+  function renderDailyPanels(){
+    const w = loadWeekData();
+    const day = w[currentDay];
+
+    const achBody = document.getElementById('achievementsBody');
+    achBody.innerHTML = day.achievements.length ? '' :
+      '<div class="empty-state" id="achievementsEmptyState">Nothing logged yet. While recording, TeacherBuddy listens for moments of praise or positive recognition and lists them here automatically — review and remove anything it got wrong.</div>';
+    day.achievements.forEach(e => renderAutoItem('achievementsBody', e, 'achievement'));
+
+    const anecBody = document.getElementById('anecdotesBody');
+    anecBody.innerHTML = day.anecdotes.length ? '' :
+      '<div class="empty-state" id="anecdotesEmptyState">No anecdotal records yet today. TeacherBuddy flags possible classroom-management moments and lesson transitions it catches in the transcript — these are simple keyword matches, not real understanding, so correct or remove anything inaccurate.</div>';
+    day.anecdotes.forEach(e => renderAutoItem('anecdotesBody', e, 'anecdote'));
+
+    const idleBody = document.getElementById('idleBody');
+    idleBody.innerHTML = day.idleStretches.length ? '' :
+      '<div class="empty-state" id="idleEmptyState">No quiet stretches identified yet. TeacherBuddy marks a stretch here when it goes 5+ minutes during a recording without detecting any speech — an approximation, not a true measure of what was happening in the room.</div>';
+    day.idleStretches.forEach(e => renderIdleItem(e));
+
+    const box = document.getElementById('liveTranscriptBox');
+    if (box){
+      box.innerHTML = '';
+      const span = document.createElement('span');
+      span.className = 'empty-state';
+      span.id = 'transcriptEmptyState';
+      span.style.padding = '0';
+      span.textContent = 'Nothing transcribed yet this session. Start recording to see live text appear here as you speak — this works in Chrome; other browsers will record audio only, with no live transcript.';
+      box.appendChild(span);
+    }
+    const errEl = document.getElementById('bigRecordError');
+    if (errEl) errEl.hidden = true;
+    const statusLine = document.getElementById('recStatusLine');
+    if (statusLine) statusLine.hidden = true;
+  }
+
+  function noteSpeechActivity(){
+    if (quietSince !== null){
+      const minutes = Math.round((Date.now() - quietSince) / 60000);
+      if (minutes >= 5) logIdleStretch(currentDay, minutes);
+      quietSince = null;
+    }
+    lastSpeechAt = Date.now();
+  }
+  function startIdleWatcher(){
+    lastSpeechAt = Date.now();
+    quietSince = null;
+    idleWatcherInterval = setInterval(() => {
+      if (!bigRecording) return;
+      if (Date.now() - lastSpeechAt >= QUIET_THRESHOLD_MS && quietSince === null){
+        quietSince = lastSpeechAt;
+      }
+    }, 15000);
+  }
+  function stopIdleWatcher(closeOpenStretch){
+    clearInterval(idleWatcherInterval);
+    idleWatcherInterval = null;
+    if (closeOpenStretch && quietSince !== null){
+      const minutes = Math.round((Date.now() - quietSince) / 60000);
+      if (minutes >= 5) logIdleStretch(currentDay, minutes);
+    }
+    quietSince = null;
+  }
+
+  function startRecognition(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    const recog = new SR();
+    recog.continuous = true;
+    recog.interimResults = true;
+    recog.lang = 'en-US';
+    recog.onresult = (event) => {
+      noteSpeechActivity();
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++){
+        const res = event.results[i];
+        const text = res[0].transcript.trim();
+        if (res.isFinal){
+          if (text){
+            appendTranscript(text, true);
+            classifyUtterance(text).forEach(hit => {
+              if (hit.type === 'achievement') logAchievement(currentDay, hit.label, text);
+              else logAnecdote(currentDay, hit.label, text);
+            });
+          }
+        } else {
+          interim += text + ' ';
+        }
+      }
+      if (interim.trim()) appendTranscript(interim.trim(), false);
+    };
+    recog.onerror = (event) => {
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed'){
+        setRecStatus('Live transcription was blocked — continuing with audio-only recording.', false);
+      } else if (event.error === 'network'){
+        setRecStatus('Transcription lost its connection — retrying…', false);
+      }
+      // 'no-speech' and similar are benign; recognition ends and restarts on its own below.
+    };
+    recog.onend = () => {
+      if (bigRecording && bigRecognition === recog){
+        // Browsers stop SpeechRecognition after silence or an internal time limit —
+        // restart it transparently so an 8-hour day keeps getting transcribed.
+        try { recog.start(); setRecStatus('Listening…', true); }
+        catch (e){ setTimeout(() => { if (bigRecording && bigRecognition === recog){ try { recog.start(); } catch (e2){ /* give up quietly; audio recording continues regardless */ } } }, 500); }
+      }
+    };
+    bigRecognition = recog;
+    try {
+      recog.start();
+      setRecStatus('Listening…', true);
+    } catch (e){ /* ignore — start() can throw if called in rapid succession */ }
+  }
+  function stopRecognition(){
+    if (bigRecognition){
+      const recog = bigRecognition;
+      bigRecognition = null; // clear first so onend above doesn't try to restart it
+      recog.onend = null;
+      try { recog.stop(); } catch (e){ /* already stopped */ }
+    }
+  }
+
+  async function toggleBigRecording(){
+    const btn = document.getElementById('bigRecordBtn');
+    const label = document.getElementById('bigRecordLabel');
+    const dot = document.getElementById('bigRecordDot');
+    const timer = document.getElementById('bigRecordTimer');
+    const errEl = document.getElementById('bigRecordError');
+    errEl.hidden = true;
+
+    if (!bigRecording){
+      btn.disabled = true;
+      label.textContent = 'Requesting microphone…';
+      const stream = await getMic('bigRecordError');
+      btn.disabled = false;
+      if (!stream){ label.textContent = 'Start Recording'; return; }
+      bigStream = stream;
+      bigAudioChunks = [];
+
+      try {
+        bigRecorder = new MediaRecorder(stream, { audioBitsPerSecond: RECORD_AUDIO_BITRATE });
+      } catch (e){
+        try { bigRecorder = new MediaRecorder(stream); }
+        catch (e2){
+          errEl.textContent = 'Your browser couldn\'t start a recorder (' + (e2 && e2.name ? e2.name : 'error') + ').';
+          errEl.hidden = false;
+          stream.getTracks().forEach(t => t.stop());
+          label.textContent = 'Start Recording';
+          return;
+        }
+      }
+      bigRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) bigAudioChunks.push(e.data); };
+      bigRecorder.onstop = () => {
+        bigStream.getTracks().forEach(t => t.stop());
+        if (!bigAudioChunks.length) return;
+        const blob = new Blob(bigAudioChunks, { type: bigRecorder.mimeType || 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        const sizeMb = (blob.size / (1024 * 1024)).toFixed(1);
+        const dl = document.createElement('a');
+        dl.href = url;
+        dl.download = 'teacherbuddy-' + currentDay + '-' + Date.now() + '.webm';
+        dl.textContent = 'Download today\'s audio (~' + sizeMb + ' MB)';
+        dl.style.cssText = 'margin-left:10px; font-weight:700; color:var(--accent);';
+        document.getElementById('recStatusLine').appendChild(dl);
+      };
+      bigRecorder.start(5000); // flush a chunk every 5s so memory holds compressed data, not one giant buffer
+
+      bigRecording = true;
+      bigRecordSeconds = 0;
+      label.textContent = 'Stop Recording';
+      btn.classList.add('recording');
+      dot.classList.add('active');
+      timer.hidden = false;
+      updateBigTimer();
+      bigRecordInterval = setInterval(() => { bigRecordSeconds++; updateBigTimer(); }, 1000);
+
+      startIdleWatcher();
+      if (recognitionSupported){
+        startRecognition();
+      } else {
+        setRecStatus('Live transcription isn\'t available in this browser (Chrome is required) — recording audio only.', false);
+      }
+    } else {
+      bigRecording = false;
+      clearInterval(bigRecordInterval);
+      label.textContent = 'Start Recording';
+      btn.classList.remove('recording');
+      dot.classList.remove('active');
+      logRecordedSeconds(currentDay, bigRecordSeconds);
+
+      stopRecognition();
+      stopIdleWatcher(true);
+      setRecStatus('Stopped — preparing today\'s audio file…', false);
+
+      if (bigRecorder && bigRecorder.state !== 'inactive') bigRecorder.stop();
+    }
+  }
+
+  function submitReflection(){
+    document.getElementById('submitSuccess').classList.add('show');
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = '✓ Submitted';
+  }
+
+  function stampNow(){
+    const now = new Date();
+    const h = now.getHours() % 12 || 12;
+    const m = String(now.getMinutes()).padStart(2,'0');
+    return h + ':' + m + ' ' + (now.getHours() >= 12 ? 'PM' : 'AM');
+  }
+  function clearCheckinEmptyState(){
+    const el = document.getElementById('checkinEmptyState');
+    if (el) el.remove();
+  }
+  let checkinRecorder = null;
+  let checkinStream = null;
+  async function toggleRecorder(){
+    const btn = document.getElementById('recordBtn');
+
+    if (checkinRecorder && checkinRecorder.state === 'recording'){
+      checkinRecorder.stop();
+      return;
+    }
+
+    const priorLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Requesting microphone…';
+    const stream = await getMic('checkinError');
+    if (!stream){ btn.disabled = false; btn.textContent = priorLabel; return; }
+    checkinStream = stream;
+
+    const chunks = [];
+    let recorder;
+    try {
+      recorder = new MediaRecorder(stream);
+    } catch (err){
+      stream.getTracks().forEach(t => t.stop());
+      const el = document.getElementById('checkinError');
+      el.textContent = 'Your browser couldn\'t start a recorder (' + (err && err.name ? err.name : 'error') + ').';
+      el.hidden = false;
+      btn.disabled = false; btn.textContent = priorLabel;
+      return;
+    }
+    recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      checkinStream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble me';
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.src = url;
+      bubble.appendChild(audio);
+      const stamp = document.createElement('span');
+      stamp.className = 'stamp';
+      stamp.textContent = 'You (voice note) · ' + stampNow();
+      bubble.appendChild(stamp);
+      clearCheckinEmptyState();
+      document.getElementById('checkinChat').appendChild(bubble);
+      logVoiceNote(currentDay);
+
+      btn.disabled = false;
+      btn.textContent = '🎙 Record a voice note';
+      checkinRecorder = null;
+    };
+    checkinRecorder = recorder;
+    recorder.start();
+    btn.disabled = false;
+    btn.textContent = '⏹ Stop recording';
+  }
+  function toggleTyping(){ document.getElementById('typingDialog').classList.toggle('show'); }
+  function sendTypedReply(){
+    const textarea = document.querySelector('#typingDialog textarea');
+    const text = textarea.value.trim();
+    if (!text) return;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble me';
+    const span = document.createElement('span');
+    span.textContent = text;
+    bubble.appendChild(span);
+    const stamp = document.createElement('span');
+    stamp.className = 'stamp';
+    stamp.textContent = 'You · ' + stampNow();
+    bubble.appendChild(stamp);
+    clearCheckinEmptyState();
+    document.getElementById('checkinChat').appendChild(bubble);
+    logReply(currentDay, text);
+    textarea.value = '';
+    document.getElementById('typingDialog').classList.remove('show');
+  }
+</script>
